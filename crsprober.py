@@ -116,7 +116,7 @@ if __name__ == "__main__":
 	v = test_target(target)
 	if not v:
 		print("Unknown version.")
-	elif v == "off":
+	elif v in ("off", "timeout"):
 		print("CRS doesn't seems to be installed on the target.")
 	else:
 		print("Detected version: %s (PL%s)" % (v["version"], v["pl"]))
