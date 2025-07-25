@@ -40,9 +40,14 @@ tests = [
 	{"version": "3.1.1", "payloads": [{"get": "/?asp.net_sessionid=a", "trigger": 1}, {"get": "/?aspXnet_sessionid=a", "trigger": 0}]},
 	{"version": "3.1.0", "payloads": [{"headers": {"User-Agent": "Detectify"}, "trigger": 1}]},
 	{"version": "3.0.1 / 3.0.2", "payloads": [{"headers": {"Cookie": "a=[/php]"}, "trigger": 1}]},
-	{"version": "3.0.0", "payloads": [{"headers": {"Cookie": "a=<?php"}, "trigger": 1}, {"headers": {"Cookie": "a=[/php]"}, "trigger": 0}]},
+	{"version": "3.0.0", "payloads": [{"headers": {"Cookie": "a=<?php"}, "trigger": 1}, {"headers": {"Cookie": "a=[/php]"}, "trigger": 0}]}
 ]
 
+tests_pl = [
+	{"pl": "4", "payload": {"headers": {"X-test-pl": "test'"}}},
+	{"pl": "3", "payload": {"headers": {"X-test-pl": "test%"}}},
+	{"pl": "2", "payload": {"get": "/?a=https://example.com"}}
+]
 
 def test_target(target):
 	try:
@@ -50,9 +55,11 @@ def test_target(target):
 		# to lower the noise from WAF
 		req.add_header("Accept", "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5")
 		req.add_header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
-		response = urllib.request.urlopen(req)
+		response = urllib.request.urlopen(req, timeout=2)
 	except urllib.error.HTTPError as e:
 		crs_blocking_code = e.code
+	except urllib.error.URLError:
+		return "timeout"
 	else:
 		return "off"
 	detected_version = None
@@ -65,9 +72,11 @@ def test_target(target):
 				req.add_header("Accept", "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5")
 				if "headers" not in p or ("headers" in p and "User-Agent" not in p["headers"]):
 					req.add_header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
-				response = urllib.request.urlopen(req)
+				response = urllib.request.urlopen(req, timeout=2)
 			except urllib.error.HTTPError as e:
 				code = e.code
+			except urllib.error.URLError:
+				break
 			else:
 				code = response.status
 			if (p["trigger"] == 1 and code != crs_blocking_code) or (p["trigger"] == 0 and code == crs_blocking_code):
@@ -76,7 +85,26 @@ def test_target(target):
 		if ok:
 			detected_version = t["version"]
 			break
-	return detected_version
+	if detected_version:
+		detected_pl = "1"
+		for t in tests_pl:
+			try:
+				req = urllib.request.Request("%s%s" % (target, t["payload"]["get"] if "get" in t["payload"] else ""), headers=t["payload"]["headers"] if "headers" in t["payload"] else {})
+				# to lower the noise from WAF
+				req.add_header("Accept", "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5")
+				if "headers" not in p or ("headers" in p and "User-Agent" not in p["headers"]):
+					req.add_header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+				response = urllib.request.urlopen(req, timeout=2)
+			except urllib.error.HTTPError as e:
+				code = e.code
+			except urllib.error.URLError:
+				break
+			else:
+				code = response.status
+			if code == crs_blocking_code:
+				detected_pl = t["pl"]
+				break
+	return {"version": detected_version, "pl": detected_pl}
 
 if __name__ == "__main__":
 	if len(sys.argv) != 2 or not (sys.argv[1].lower().startswith("http://") or sys.argv[1].lower().startswith("https://")):
@@ -91,4 +119,4 @@ if __name__ == "__main__":
 	elif v == "off":
 		print("CRS doesn't seems to be installed on the target.")
 	else:
-		print("Detected version:", v)
+		print("Detected version: %s (PL%s)" % (v["version"], v["pl"]))
