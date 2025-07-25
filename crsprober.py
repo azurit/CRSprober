@@ -119,4 +119,4 @@ if __name__ == "__main__":
 	elif v in ("off", "timeout"):
 		print("CRS doesn't seems to be installed on the target.")
 	else:
-		print("Detected version: %(version)s (PL%(pl)s)" % v)
+		print("Detected version: %(version)s (PL%(pl)s)." % v)
