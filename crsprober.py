@@ -11,8 +11,6 @@ import sys
 import urllib.request
 import urllib.error
 
-target = "localhost"
-
 tests = [
 	{"version": "4.16.0 or newer", "payloads": [{"get": "/.deployment-secrets.txt", "trigger": 1}]},
 	{"version": "4.15.0", "payloads": [{"get": "/database.yaml", "trigger": 1}]},
