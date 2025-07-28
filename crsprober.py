@@ -51,6 +51,19 @@ tests_pl = [
 
 def test_target(target):
 	try:
+		req = urllib.request.Request(target)
+		# to lower the noise from WAF
+		req.add_header("Accept", "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5")
+		req.add_header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+		response = urllib.request.urlopen(req, timeout=2)
+	except urllib.error.HTTPError as e:
+		return "invalid_code"
+	except urllib.error.URLError:
+		return "timeout"
+	else:
+		if response.status != 200:
+			return "invalid_code"
+	try:
 		req = urllib.request.Request("%s/?a=/etc/passwd" % target)
 		# to lower the noise from WAF
 		req.add_header("Accept", "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5")
@@ -118,5 +131,7 @@ if __name__ == "__main__":
 		print("Unknown version.")
 	elif v in ("off", "timeout"):
 		print("CRS doesn't seems to be installed on the target.")
+	elif v == "invalid_code":
+		print("Target must return HTTP code 200.")
 	else:
 		print("Detected version: %(version)s (PL%(pl)s)." % v)
