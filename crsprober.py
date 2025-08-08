@@ -12,7 +12,9 @@ import urllib.request
 import urllib.error
 
 tests = [
-	{"version": "4.16.0 or newer", "payloads": [{"get": "/.deployment-secrets.txt", "trigger": 1}]},
+	{"version": "4.17.1 or newer", "payloads": [{"headers": {"Cookie": "a=\\{}="}, "trigger": 0}, {"get": "/java.net.JarURLConnection", "trigger": 1}]},
+	{"version": "4.17.0", "payloads": [{"get": "/java.net.JarURLConnection", "trigger": 1}]},
+	{"version": "4.16.0", "payloads": [{"get": "/.deployment-secrets.txt", "trigger": 1}]},
 	{"version": "4.15.0", "payloads": [{"get": "/database.yaml", "trigger": 1}]},
 	{"version": "4.14.0", "payloads": [{"get": "/console.dir(", "trigger": 1}]},
 	{"version": "4.13.0", "payloads": [{"get": "/.travis.yaml", "trigger": 1}]},
