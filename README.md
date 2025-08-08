@@ -2,7 +2,7 @@
 
 ## Description
 
-This tool remotely detects the version of the OWASP Core Rule Set (CRS) used by a ModSecurity WAF. It also identifies the configured paranoia level (PL) of the CRS, providing insights into the WAF's security posture without requiring local access.
+This tool remotely detects the version of the [OWASP Core Rule Set (CRS)](https://github.com/coreruleset/coreruleset) used by a ModSecurity WAF. It also identifies the configured paranoia level (PL) of the CRS, providing insights into the WAF's security posture without requiring local access.
 
 ## Prerequisities
 
