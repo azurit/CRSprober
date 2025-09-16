@@ -12,6 +12,7 @@ import urllib.request
 import urllib.error
 
 tests = [
+	{"version": "4.18.0", "payloads": [{"headers": {"Cookie": "a=;rmt-dump"}, "trigger": 1}]},
 	{"version": "4.17.1 or newer", "payloads": [{"headers": {"Cookie": "a=\\{}="}, "trigger": 0}, {"get": "/java.net.JarURLConnection", "trigger": 1}]},
 	{"version": "4.17.0", "payloads": [{"get": "/java.net.JarURLConnection", "trigger": 1}]},
 	{"version": "4.16.0", "payloads": [{"get": "/.deployment-secrets.txt", "trigger": 1}]},
